@@ -53,14 +53,18 @@ fi
 
 if [ $current_os = "Debian" ]
 then
-	su --preserve-environment -c "apt-get install unzip libpcre3 libpcre3-dev"
+	su --preserve-environment -c "/etc/init.d/nginx stop && apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential"
 elif [ $current_os = "Ubuntu" ]
 then
-	sudo apt-get install unzip libpcre3 libpcre3-dev
+	sudo /etc/init.d/nginx stop
+	sudo apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential
 else
 	echo -e "$current_os is not yet supported\n"
 fi
 NGINX_PATH=nginx-1.9.9
+
+rm -rf nginx-1.9.9*
+rm -rf nginx-rtmp-module-master*
 
 wget http://nginx.org/download/"$NGINX_PATH".tar.gz
 tar -xzvf "$NGINX_PATH".tar.gz
