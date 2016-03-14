@@ -53,7 +53,7 @@ fi
 
 if [ $current_os = "Debian" ]
 then
-	su --preserve-environment -c "/etc/init.d/nginx stop && apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential"
+	su --preserve-environment -c "/etc/init.d/nginx stop || apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential"
 elif [ $current_os = "Ubuntu" ]
 then
 	sudo /etc/init.d/nginx stop
