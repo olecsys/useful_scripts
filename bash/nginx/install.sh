@@ -33,11 +33,10 @@ then
 		if [ `grep -i debian /etc/issue | wc -l` -gt "0" ]
 		then
 			current_os="Debian"
-			su --preserve-environment -c "apt-get install unzip libpcre3 libpcre3-dev"
+			
 		elif [ `grep -i ubuntu /etc/issue | wc -l` -gt "0" ]
 		then
 			current_os="Ubuntu"
-			sudo apt-get install unzip libpcre3 libpcre3-dev
 		else
 			echo "Run as root !"
 		fi
@@ -50,9 +49,17 @@ then
 	else
 		echo "UnknownOS: Run as root !"
 	fi
-	exit
 fi
 
+if [ $current_os = "Debian" ]
+then
+	su --preserve-environment -c "apt-get install unzip libpcre3 libpcre3-dev"
+elif [ $current_os = "Ubuntu" ]
+then
+	sudo apt-get install unzip libpcre3 libpcre3-dev
+else
+	echo -e "$current_os is not yet supported\n"
+fi
 NGINX_PATH=nginx-1.9.9
 
 wget http://nginx.org/download/"$NGINX_PATH".tar.gz
@@ -63,6 +70,18 @@ unzip nginx-rtmp-module-master.zip -d nginx-rtmp-module-master
 
 cd $NGINX_PATH
 ./configure --prefix=/usr --conf-path=/etc/nginx/nginx.conf --add-module=../nginx-rtmp-module-master/arut-nginx-rtmp-module-*/ --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module
+make
+
+if [ $current_os = "Debian" ]
+then
+	su --preserve-environment -c "make install && /etc/init.d/nginx start"
+elif [ $current_os = "Ubuntu" ]
+then
+	sudo make install
+	sudo /etc/init.d/nginx start
+else
+	echo -e "$current_os is not yet supported\n"
+fi
 
 echo -e "\nPress <ENTER> to continue"
 read OS
