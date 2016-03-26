@@ -53,31 +53,23 @@ fi
 
 if [ $current_os = "Debian" ]
 then
-	su --preserve-environment -c "/etc/init.d/nginx stop 
-	|| update-rc.d -f nginx remove 
-	|| apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential 
-	|| wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O /etc/init.d/nginx 
-	|| chmod +x /etc/init.d/nginx 
-	|| update-rc.d -f nginx defaults"
+	su --preserve-environment -c "apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential"
 elif [ $current_os = "Ubuntu" ]
 then
-	sudo /etc/init.d/nginx stop
-	sudo update-rc.d -f nginx remove
-	sudo apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential
-	sudo wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O /etc/init.d/nginx 
-	sudo chmod +x /etc/init.d/nginx
-	sudo update-rc.d -f nginx defaults
+	sudo apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential	
 else
 	echo -e "$current_os is not yet supported\n"
 fi
 NGINX_PATH=nginx-1.9.9
 
+rm etc_init_d_nginx
 rm -rf $NGINX_PATH*
 rm -rf nginx-rtmp-module-master*
 
 wget http://nginx.org/download/"$NGINX_PATH".tar.gz
 tar -xzvf "$NGINX_PATH".tar.gz
 
+wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O etc_init_d_nginx 
 wget https://github.com/arut/nginx-rtmp-module/zipball/master -O nginx-rtmp-module-master.zip
 unzip nginx-rtmp-module-master.zip -d nginx-rtmp-module-master
 
@@ -87,12 +79,13 @@ make
 
 if [ $current_os = "Debian" ]
 then
-	su --preserve-environment -c "make install 
-	&& /etc/init.d/nginx start"
+	su --preserve-environment -c "/etc/init.d/nginx stop || update-rc.d -f nginx remove || make install && cp ../etc_init_d_nginx /etc/init.d/ && chmod +x /etc/init.d/nginx && update-rc.d -f nginx defaults && /etc/init.d/nginx start"
 elif [ $current_os = "Ubuntu" ]
 then
 	sudo make install
 	sudo /etc/init.d/nginx start
+	sudo chmod +x /etc/init.d/nginx
+	sudo update-rc.d -f nginx defaults
 else
 	echo -e "$current_os is not yet supported\n"
 fi
