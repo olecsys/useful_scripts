@@ -53,7 +53,12 @@ fi
 
 if [ $current_os = "Debian" ]
 then
-	su --preserve-environment -c "/etc/init.d/nginx stop || update-rc.d -f nginx remove || apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential || wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O /etc/init.d/nginx || chmod +x /etc/init.d/nginx || update-rc.d -f nginx defaults"
+	su --preserve-environment -c "/etc/init.d/nginx stop 
+	|| update-rc.d -f nginx remove 
+	|| apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential 
+	|| wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O /etc/init.d/nginx 
+	|| chmod +x /etc/init.d/nginx 
+	|| update-rc.d -f nginx defaults"
 elif [ $current_os = "Ubuntu" ]
 then
 	sudo /etc/init.d/nginx stop
@@ -82,7 +87,8 @@ make
 
 if [ $current_os = "Debian" ]
 then
-	su --preserve-environment -c "make install && /etc/init.d/nginx start"
+	su --preserve-environment -c "make install 
+	&& /etc/init.d/nginx start"
 elif [ $current_os = "Ubuntu" ]
 then
 	sudo make install
