@@ -53,17 +53,21 @@ fi
 
 if [ $current_os = "Debian" ]
 then
-	su --preserve-environment -c "/etc/init.d/nginx stop || apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential"
+	su --preserve-environment -c "/etc/init.d/nginx stop || update-rc.d -f nginx remove || apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential || wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O /etc/init.d/nginx || chmod +x /etc/init.d/nginx || update-rc.d -f nginx defaults"
 elif [ $current_os = "Ubuntu" ]
 then
 	sudo /etc/init.d/nginx stop
+	sudo update-rc.d -f nginx remove
 	sudo apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential
+	sudo wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O /etc/init.d/nginx 
+	sudo chmod +x /etc/init.d/nginx
+	sudo update-rc.d -f nginx defaults
 else
 	echo -e "$current_os is not yet supported\n"
 fi
 NGINX_PATH=nginx-1.9.9
 
-rm -rf nginx-1.9.9*
+rm -rf $NGINX_PATH*
 rm -rf nginx-rtmp-module-master*
 
 wget http://nginx.org/download/"$NGINX_PATH".tar.gz
@@ -73,7 +77,7 @@ wget https://github.com/arut/nginx-rtmp-module/zipball/master -O nginx-rtmp-modu
 unzip nginx-rtmp-module-master.zip -d nginx-rtmp-module-master
 
 cd $NGINX_PATH
-./configure --prefix=/usr --conf-path=/etc/nginx/nginx.conf --add-module=../nginx-rtmp-module-master/arut-nginx-rtmp-module-*/ --pid-path=/var/run/nginx.pid --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --with-http_ssl_module
+./configure --add-module=../nginx-rtmp-module-master/arut-nginx-rtmp-module-*/ --with-http_ssl_module
 make
 
 if [ $current_os = "Debian" ]
