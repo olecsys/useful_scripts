@@ -38,7 +38,7 @@ then
 		then
 			current_os="Debian"
 			install_success="false"
-			su --preserve-environment -c "bash $current_os $current_user $current_user_group" && install_success="true"
+			su --preserve-environment -c "bash $0 $current_os $current_user $current_user_group" && install_success="true"
 			if [ $install_success = "false" ]
 			then
 				exit 20
@@ -47,7 +47,7 @@ then
 		then
 			current_os="Ubuntu"
 			install_success="false"
-			sudo -E bash $current_os $current_user $current_user_group && install_success="true"
+			sudo -E bash $0 $current_os $current_user $current_user_group && install_success="true"
 			if [ $install_success = "false" ]
 			then
 				exit 21
@@ -196,14 +196,14 @@ if [ ! `$ID_UTILITY -u` = "0" ]
 then
 	if [ $current_os = "Debian" ]
 	then
-		su --preserve-environment -c "bash $current_os $current_user $current_user_group endcode_to_exec" && install_success="true"
+		su --preserve-environment -c "bash $0 $current_os $current_user $current_user_group endcode_to_exec" && install_success="true"
 		if [ $install_success = "false" ]
 		then
 			exit 18
 		fi		
 	elif [ $current_os = "Ubuntu" ]
 	then
-		sudo -E bash $current_os $current_user $current_user_group endcode_to_exec && install_success="true"
+		sudo -E bash $0 $current_os $current_user $current_user_group endcode_to_exec && install_success="true"
 		if [ $install_success = "false" ]
 		then
 			exit 19
