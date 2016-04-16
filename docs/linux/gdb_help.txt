@@ -12,7 +12,14 @@ gdb --pid=pid
 'break <file.cpp>:<line> if strcmp(y, "hello") == 0' - установить точку останова с условием
 'info share' - информация о загруженных модулях
 
+set debug-file-directory /mnt/video7_lin
+set solib-search-path /opt/core/bin/linux/x64
+
 Полезные команды bash для отладки:
 
 'ps uH p <PID_OF_PROCESS> | wc -l' или 'ps -L -o pid= -p <pid> | wc -l' - количество потоков в процессе
 'lsof -p <PID_OF_PROCESS> | wc -l' - количество открытых файлов в процессе
+
+Получить имя функции по смещению( +0x2342a, например):
+$ gdb <путь к библиотеке>
+info symbol 0x2342a 

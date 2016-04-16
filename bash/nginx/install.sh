@@ -5,9 +5,12 @@ cd "`dirname "$0"`"
 script_dir="`pwd`/`basename "$0"`"
 script_dir=`dirname "$script_dir"`
 
+NGINX_PATH=nginx-1.9.9
+
 current_os=$1
 current_user=$2
 current_user_group=$3
+code_to_exec=$4
 current_machine="$(uname -m)"	
 if [ -z $current_user ]; then
 	current_user="$(whoami)"
@@ -28,66 +31,184 @@ then
 	if [ $current_os = "SunOS" ]
 	then
 		echo "Solaris: Run as root !"
+		exit 2
 	elif [ $current_os = "Linux" ]
 	then
 		if [ `grep -i debian /etc/issue | wc -l` -gt "0" ]
 		then
 			current_os="Debian"
-			
+			install_success="false"
+			su --preserve-environment -c "bash $current_os $current_user $current_user_group" && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 20
+			fi
 		elif [ `grep -i ubuntu /etc/issue | wc -l` -gt "0" ]
 		then
 			current_os="Ubuntu"
+			install_success="false"
+			sudo -E bash $current_os $current_user $current_user_group && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 21
+			fi
 		else
-			echo "Run as root !"
+			echo "Unknown Linux distributive is not supported yet"
+			exit 2
 		fi
 	elif [ $current_os = "Darwin" ]
 	then
-		echo "Mac X: Run as root !"
+		echo "Mac X is not supported yet"
+		exit 2
 	elif [ $current_os = "HP-UX" ]
 	then
-		echo "HP-UX: Run as root !"
+		echo "HP-UX is not supported yet"
+		exit 2
 	else
-		echo "UnknownOS: Run as root !"
+		echo "UnknownOS is not supported yet"
+		exit 2
+	fi
+else
+	if [ $current_os = "Debian" ] || [ $current_os = "Ubuntu" ]
+	then
+		if [ -z $code_to_exec ]; then
+			install_success="false"
+			apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 1
+			fi
+			exit 0
+		else
+			/etc/init.d/nginx stop
+			
+			update-rc.d -f nginx remove
+
+			install_success="false"
+			cd /tmp/$NGINX_PATH && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 15
+			fi
+	
+			install_success="false"
+			make install && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 4
+			fi
+			
+			install_success="false"
+			mv ../etc_init_d_nginx /etc/init.d/nginx && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 5
+			fi
+			
+			install_success="false"
+			chmod +x /etc/init.d/nginx && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 6
+			fi
+			
+			install_success="false"
+			update-rc.d -f nginx defaults && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 7
+			fi
+			
+			install_success="false"
+			/etc/init.d/nginx start && install_success="true"
+			if [ $install_success = "false" ]
+			then
+				exit 8
+			fi
+			
+			exit 0
+		fi
 	fi
 fi
 
-if [ $current_os = "Debian" ]
+rm -rf /tmp/etc_init_d_nginx
+rm -rf /tmp/$NGINX_PATH*
+rm -rf /tmp/nginx-rtmp-module-master*
+
+
+install_success="false"
+wget http://nginx.org/download/"$NGINX_PATH".tar.gz -O /tmp/"$NGINX_PATH".tar.gz && install_success="true"
+if [ $install_success = "false" ]
 then
-	su --preserve-environment -c "apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential"
-elif [ $current_os = "Ubuntu" ]
-then
-	sudo apt-get install unzip libpcre3 libpcre3-dev openssl libssl-dev build-essential	
-else
-	echo -e "$current_os is not yet supported\n"
+	exit 10
 fi
-NGINX_PATH=nginx-1.9.9
 
-rm etc_init_d_nginx
-rm -rf $NGINX_PATH*
-rm -rf nginx-rtmp-module-master*
-
-wget http://nginx.org/download/"$NGINX_PATH".tar.gz
-tar -xzvf "$NGINX_PATH".tar.gz
-
-wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O etc_init_d_nginx 
-wget https://github.com/arut/nginx-rtmp-module/zipball/master -O nginx-rtmp-module-master.zip
-unzip nginx-rtmp-module-master.zip -d nginx-rtmp-module-master
-
-cd $NGINX_PATH
-./configure --add-module=../nginx-rtmp-module-master/arut-nginx-rtmp-module-*/ --with-http_ssl_module
-make
-
-if [ $current_os = "Debian" ]
+install_success="false"
+tar -xzvf /tmp/"$NGINX_PATH".tar.gz -C /tmp && install_success="true"
+if [ $install_success = "false" ]
 then
-	su --preserve-environment -c "/etc/init.d/nginx stop || update-rc.d -f nginx remove || make install && cp ../etc_init_d_nginx /etc/init.d/ && chmod +x /etc/init.d/nginx && update-rc.d -f nginx defaults && /etc/init.d/nginx start"
-elif [ $current_os = "Ubuntu" ]
+	exit 11
+fi
+
+install_success="false"
+wget https://raw.githubusercontent.com/JasonGiedymin/nginx-init-ubuntu/master/nginx -O /tmp/etc_init_d_nginx && install_success="true"
+if [ $install_success = "false" ]
 then
-	sudo make install
-	sudo /etc/init.d/nginx start
-	sudo chmod +x /etc/init.d/nginx
-	sudo update-rc.d -f nginx defaults
-else
-	echo -e "$current_os is not yet supported\n"
+	exit 12
+fi
+
+install_success="false"
+wget https://github.com/arut/nginx-rtmp-module/zipball/master -O /tmp/nginx-rtmp-module-master.zip && install_success="true"
+if [ $install_success = "false" ]
+then
+	exit 13
+fi
+
+install_success="false"
+unzip nginx-rtmp-module-master.zip -d /tmp/nginx-rtmp-module-master && install_success="true"
+if [ $install_success = "false" ]
+then
+	exit 14
+fi
+
+install_success="false"
+cd /tmp/$NGINX_PATH && install_success="true"
+if [ $install_success = "false" ]
+then
+	exit 15
+fi
+
+install_success="false"
+./configure --add-module=/tmp/nginx-rtmp-module-master/arut-nginx-rtmp-module-*/ --with-http_ssl_module && install_success="true"
+if [ $install_success = "false" ]
+then
+	exit 16
+fi
+
+install_success="false"
+make && install_success="true"
+if [ $install_success = "false" ]
+then
+	exit 17
+fi
+
+if [ ! `$ID_UTILITY -u` = "0" ]
+then
+	if [ $current_os = "Debian" ]
+	then
+		su --preserve-environment -c "bash $current_os $current_user $current_user_group endcode_to_exec" && install_success="true"
+		if [ $install_success = "false" ]
+		then
+			exit 18
+		fi		
+	elif [ $current_os = "Ubuntu" ]
+	then
+		sudo -E bash $current_os $current_user $current_user_group endcode_to_exec && install_success="true"
+		if [ $install_success = "false" ]
+		then
+			exit 19
+		fi
+	fi
 fi
 
 echo -e "\nPress <ENTER> to continue"
