@@ -1,6 +1,8 @@
 gdb --pid=pid
 
+gdb <program> core - debug coredump core produced by program
 
+'thread find LWP' - thread search
 Сthread threadnoТ, a command to switch among threads
 Сinfo threadsТ, a command to inquire about existing threads
 'frame N' - переход по функци€м в стеке, где N - номер функции
@@ -19,6 +21,8 @@ set solib-search-path /opt/core/bin/linux/x64
 
 'ps uH p <PID_OF_PROCESS> | wc -l' или 'ps -L -o pid= -p <pid> | wc -l' - количество потоков в процессе
 'lsof -p <PID_OF_PROCESS> | wc -l' - количество открытых файлов в процессе
+'ps -Lf <PID_OF_PROCESS>' - загрузка CPU по потокам
+'valgrind --tool=callgrind <PATH_OF_EXECUTABLE>' - загрузка CPU
 
 ѕолучить им€ функции по смещению( +0x2342a, например):
 $ gdb <путь к библиотеке>
