@@ -13,6 +13,8 @@ gdb <program> core - debug coredump core produced by program
 'info breakpoints' - информация о точках останова
 'break <file.cpp>:<line> if strcmp(y, "hello") == 0' - установить точку останова с условием
 'info share' - информация о загруженных модулях
+'next' - переход к следующей строке кода
+'step' - переход внутрь функции
 
 set debug-file-directory /mnt/video7_lin
 set solib-search-path /opt/core/bin/linux/x64
