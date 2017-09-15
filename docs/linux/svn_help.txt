@@ -8,3 +8,14 @@ svn merge -r head:prev l3toks.dtx
 
 Отменить все изменения:
 svn revert -R .
+
+Add all files and dirs from directory
+
+svn add --force <DIRECTORY>
+
+Add all files and dirs from directory without ignores
+
+svn add --force --no-ignore <DIRECTORY>
+
+See changes in file
+svn diff <FILE>
